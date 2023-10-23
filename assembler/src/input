@@ -1,0 +1,84 @@
+%{
+#include "assembler.h"
+#include <stdlib.h>
+%}
+
+alpha       [a-fA-F]
+digit		[0-9]
+letter      [a-zA-z]
+number {digit}+
+symbol  ({letter}|\_)({letter}|{digit}|\_)*
+hex_literal1    0(x|X)({alpha}|{digit}){1,4}
+hex_literal2    ({alpha}|{digit}){1,4}h
+dec_literal     {digit}{1,5}
+literal {hex_literal1}|{hex_literal2}|{dec_literal}
+
+label   {symbol}\:
+end     \.end
+section \.section
+section_name    \.{symbol}
+word \.word
+skip \.skip
+global \.global
+extern \.extern
+equ \.equ
+listed_symbol {symbol},
+listed_literal {literal},
+expr_symbol     ({symbol}|{literal})[+-]
+reg r[0-7]
+immed   $({symbol}|{literal})
+reg_dir {reg}[,]*
+reg_ind \[{reg}\]
+reg_ind_rel \[({reg}[ ]*\+[ ]*({symbol}|{literal}))\]
+mem     ({symbol}|{literal})
+pc_rel  \%{symbol}
+j_reg_dir \*{reg_dir}
+j_reg_ind \*{reg_ind}
+j_reg_ind_rel \*{reg_ind_rel}
+j_abs ({symbol}|{literal})
+j_mem     \*{mem}
+j_pc_rel  {pc_rel}
+comment \#.*\n
+
+zero_op_inst     halt|iret|ret
+one_op_inst     int|not
+jump_inst   j(mp|eq|ne|gt)|call
+two_op_inst     (xchg|add|sub|mul|div|cmp|not|and|or|xor|test|shl|shr)
+load ldr
+store str
+push push
+pop pop
+
+%%
+{comment}   currentlyProcessing = COMMENT;
+{zero_op_inst}  currentlyProcessing = INSTRUCTION; return ZERO_OPERANDS;
+{one_op_inst}   currentlyProcessing = INSTRUCTION; return ONE_OPERAND;
+{two_op_inst}   currentlyProcessing = INSTRUCTION; return TWO_OPERANDS;
+{jump_inst}   currentlyProcessing = INSTRUCTION_JUMP; return JUMP;
+{load}   currentlyProcessing = INSTRUCTION; return LOAD;
+{store} currentlyProcessing = INSTRUCTION; return STORE;
+{push} currentlyProcessing = INSTRUCTION; return PUSH;
+{pop} currentlyProcessing = INSTRUCTION; return POP;
+{end} currentlyProcessing = EOF_REACHED; return 0;
+{word}  currentlyProcessing = ALLOCC_WORD; return 2;
+{skip}  currentlyProcessing = SKIP; return SKIP;
+{global}    currentlyProcessing = GLOBAL; return GLOBAL;
+{extern}    currentlyProcessing = EXTERN; return EXTERN;
+{equ}       currentlyProcessing = EQU; return EQU;
+{reg_dir}   return REGDIR;
+{listed_symbol}  return currentlyProcessing == INSTRUCTION ? MEM : LISTED;
+{listed_literal}   return currentlyProcessing == INSTRUCTION ? MEM : LISTED;   
+{expr_symbol}       return EXPRESSION;
+{section}   currentlyProcessing = SECTION; return SECTION;
+{section_name}  return SECTION;
+{label} currentlyProcessing = LABEL; return LABEL;
+{pc_rel}    return PCREL;
+{immed} return IMMED;
+{reg_ind}   return REGIND;
+{reg_ind_rel}   return REGINDREL;
+{mem}   return currentlyProcessing == INSTRUCTION ? MEM : (currentlyProcessing == INSTRUCTION_JUMP ? IMMED : SYMBOL);
+{j_reg_dir}   return REGDIR;
+{j_reg_ind}   return REGIND;
+{j_reg_ind_rel}   return REGINDREL;
+{j_mem}   return currentlyProcessing == INSTRUCTION ? J_MEM : SYMBOL;
+.

@@ -1,0 +1,27 @@
+# symbol table
+#ord	sec	off	lin	size	name
+1	1	0000	L	0010	ivt
+2	2	0000	L	003e	isr
+3	0	0000	E	2	myStart
+4	0	0000	E	2	myCounter
+5	0	ff00	A	2	term_out
+6	0	ff02	A	2	term_in
+7	0	0054	A	2	asciiCode
+8	2	0000	L	2	isr_reset
+9	2	0005	L	2	isr_timer
+10	2	0016	L	2	isr_terminal
+#.rel.ivt	type	ord
+0000		R_16	2
+0004		R_16	2
+0006		R_16	2
+#.rel.isr	type	ord
+0003		R_16	3
+0029		R_PC16	4
+0035		R_16	4
+# ivt
+00 00 00 00 05 00 16 00 00 00 00 00 00 00 00 00 
+# isr
+50 00 00 00 00 b0 06 12 a0 00 00 54 00 b0 00 04 00 ff a0 06 42 20 b0 06 12 
+b0 16 12 a0 00 04 02 ff b0 00 04 00 ff a0 07 05 fe ff a0 10 00 01 00 70 01 
+b0 00 04 00 00 a0 16 42 a0 06 42 20 
+#

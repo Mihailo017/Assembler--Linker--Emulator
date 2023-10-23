@@ -1,0 +1,17 @@
+# symbol table
+#ord	sec	off	lin	size	name
+1	1	0000	L	001c	myCode
+2	2	0000	L	0002	myData
+3	0	ff10	A	2	tim_cfg
+4	1	0000	G	2	myStart
+5	1	000a	L	2	wait
+6	2	0000	G	2	myCounter
+#.rel.myCode	type	ord
+000d		R_16	6
+0019		R_16	1
+# myCode
+a0 00 00 01 00 b0 00 04 10 ff a0 00 04 00 00 a0 10 00 05 00 74 01 52 00 00 
+0a 00 00 
+# myData
+00 00 
+#
